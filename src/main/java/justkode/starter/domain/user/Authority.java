@@ -10,8 +10,8 @@ import javax.persistence.Id;
 @Entity
 @Builder
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class Authority implements GrantedAuthority {
     @Id
     @Column(length = 64)

@@ -19,10 +19,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
-        return userRepository.findOneWithAuthoritiesByUsername(username)
-                .map(user -> createUser(username, user))
-                .orElseThrow(() -> new UsernameNotFoundException(username + " 아이디를 가진 유저를 찾을 수 없습니다."));
+    public UserDetails loadUserByUsername(final String userId) throws UsernameNotFoundException {
+        return userRepository.findOneWithAuthoritiesByUserId(userId)
+                .map(user -> createUser(userId, user))
+                .orElseThrow(() -> new UsernameNotFoundException(userId + " 아이디를 가진 유저를 찾을 수 없습니다."));
     }
 
     private org.springframework.security.core.userdetails.User createUser(String username, User user) {

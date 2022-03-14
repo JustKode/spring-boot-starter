@@ -5,7 +5,10 @@ import justkode.starter.global.security.entry.JwtAuthenticationEntryPoint;
 import justkode.starter.global.security.provider.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -13,60 +16,94 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.CorsFilter;
 
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    private final TokenProvider tokenProvider;
-    private final CorsFilter corsFilter;
-    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
     @Bean
-    BCryptPasswordEncoder passwordEncoder() {
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring()
-                .antMatchers(
-                        "/h2-console/**",
-                        "/favicon.ico",
-                        "/error"
-                ).mvcMatchers(
-                        "/swagger-ui.html/**", "/configuration/**",
-                        "/swagger-resources/**", "/v2/api-docs",
-                        "/webjars/**", "/webjars/springfox-swagger-ui/*.{js,css}"
-                );
+    @Order(1)
+    @RequiredArgsConstructor
+    @Configuration
+    public static class JWTRestSecurityConfig extends WebSecurityConfigurerAdapter {
+        private static final RequestMatcher PROTECTED_URLS = new OrRequestMatcher(
+                new AntPathRequestMatcher("/api/**")
+        );
+
+        private final TokenProvider tokenProvider;
+        private final CorsFilter corsFilter;
+        private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+        private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+
+        @Override
+        public void configure(WebSecurity web) {
+            web.ignoring().mvcMatchers(HttpMethod.OPTIONS, "/**");
+        }
+
+        @Override
+        protected void configure(HttpSecurity httpSecurity) throws Exception {
+            httpSecurity
+                    // token을 사용하는 방식이기 때문에 csrf를 disable합니다.
+                    .csrf().disable()
+
+                    .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
+
+                    .exceptionHandling()
+                    .defaultAuthenticationEntryPointFor(jwtAuthenticationEntryPoint, PROTECTED_URLS)
+                    .accessDeniedHandler(jwtAccessDeniedHandler)
+
+                    // enable h2-console
+                    .and()
+                    .headers()
+                    .frameOptions()
+                    .sameOrigin()
+
+                    // 세션을 사용하지 않기 때문에 STATELESS로 설정
+                    .and()
+                    .sessionManagement()
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+
+                    .and()
+                    .authorizeRequests()
+
+                    .anyRequest().permitAll()
+
+                    .and()
+                    .apply(new JwtSecurityConfig(tokenProvider));
+        }
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()  // token 인증이기 때문에 csrf 비활성화
-                .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling()
-                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-                .accessDeniedHandler(jwtAccessDeniedHandler)
+    @Order(2)
+    @Configuration
+    public static class SwaggerSecurityConfig extends WebSecurityConfigurerAdapter {
+        private static final RequestMatcher SWAGGER_URLS = new OrRequestMatcher(
+                new AntPathRequestMatcher("/v2/api-docs")
+        );
 
-                .and()
-                .headers()
-                .frameOptions()
-                .sameOrigin()
+        @Override
+        public void configure(WebSecurity web) {
+            web.ignoring().mvcMatchers(HttpMethod.OPTIONS, "/**");
+        }
 
-                // 세션을 사용하지 않음
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-
-                .and()
-                .authorizeRequests()
-                .antMatchers("/h2-console/**", "/favicon.ico", "/error", "/swagger-ui/**").permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .apply(new JwtSecurityConfig(tokenProvider));
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            http
+                    .authorizeRequests()
+                    .requestMatchers(SWAGGER_URLS).hasRole("ADMIN")
+                    .and()
+                    .csrf().disable()
+                    .httpBasic();
+        }
     }
 }
