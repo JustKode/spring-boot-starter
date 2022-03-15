@@ -10,6 +10,6 @@ import java.util.Optional;
 public interface UserService {
     void register(UserRequestDto.Register user);
     boolean equalsPassword(String password, String encryptedPassword);
-    Optional<User> getUserWithAuthorities(String username);
-    Optional<User> getMyUserWithAuthorities();
+    User getUserWithAuthorities(String username);
+    User getMyUserWithAuthorities();
 }

@@ -5,9 +5,11 @@ import justkode.starter.domain.user.dto.UserRequestDto;
 import justkode.starter.domain.user.repository.UserRepository;
 import justkode.starter.global.security.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -27,12 +29,16 @@ public class UserServiceImpl implements UserService{
     }
 
     @Transactional(readOnly = true)
-    public Optional<User> getUserWithAuthorities(String userId) {
-        return userRepository.findOneWithAuthoritiesByUserId(userId);
+    public User getUserWithAuthorities(String userId) {
+        return userRepository.findOneWithAuthoritiesByUserId(userId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유저가 존재하지 않습니다.")
+        );
     }
 
     @Transactional(readOnly = true)
-    public Optional<User> getMyUserWithAuthorities() {
-        return SecurityUtil.getCurrentUsername().flatMap(userRepository::findOneWithAuthoritiesByUserId);
+    public User getMyUserWithAuthorities() {
+        return SecurityUtil.getCurrentUsername().flatMap(userRepository::findOneWithAuthoritiesByUserId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유저가 존재하지 않습니다.")
+        );
     }
 }
