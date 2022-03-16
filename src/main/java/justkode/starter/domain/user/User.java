@@ -52,6 +52,11 @@ public class User implements UserDetails {
     private Set<Authority> authorities;
 
     @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.authorities;
+    }
+
+    @Override
     public String getPassword() {
         return password;
     }
