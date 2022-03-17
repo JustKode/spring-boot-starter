@@ -15,19 +15,20 @@ public class UserResponseDto {
     @ApiModel(value = "유저 프로필 정보")
     @Builder
     @Getter @Setter
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class Profile {
         @ApiModelProperty(value = "유저 아이디")
-        final private String userId;
+        private String userId;
 
         @ApiModelProperty(value = "별명")
-        final private String nickname;
+        private String nickname;
 
         @ApiModelProperty(value = "이메일")
-        final private String email;
+        private String email;
 
         @ApiModelProperty(value = "유저가 가지고 있는 권한 리스트")
-        final private Collection<? extends GrantedAuthority> authorities;
+        private Collection<? extends GrantedAuthority> authorities;
 
         public static Profile of(User user) {
             return Profile.builder()
@@ -37,5 +38,15 @@ public class UserResponseDto {
                     .authorities(user.getAuthorities())
                     .build();
         }
+    }
+
+    @ApiModel(value = "유저 회원 가입 정보")
+    @Builder
+    @Getter @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Token {
+        @ApiModelProperty(value = "유저 아이디")
+        private String token;
     }
 }

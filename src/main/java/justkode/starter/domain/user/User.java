@@ -19,6 +19,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class User implements UserDetails {
 
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @JsonIgnore
     @Id
     @Column

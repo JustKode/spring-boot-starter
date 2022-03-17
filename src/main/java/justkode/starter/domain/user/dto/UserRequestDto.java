@@ -1,28 +1,45 @@
 package justkode.starter.domain.user.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import justkode.starter.domain.user.User;
+import lombok.*;
 
 
 public class UserRequestDto {
 
     @Builder
-    @Getter
-    @RequiredArgsConstructor
+    @Getter @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Login {
-        final private String userId;
-        final private String password;
+
+        @ApiModelProperty(value = "유저 아이디")
+        private String userId;
+
+        @ApiModelProperty(value = "비밀 번호")
+        private String password;
     }
 
+    @ApiModel(value = "유저 회원 가입 정보")
     @Builder
-    @Getter
-    @RequiredArgsConstructor
+    @Getter @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Register {
-        final private String userId;
-        final private String password;
-        final private String name;
-        final private String nickname;
-        final private String email;
+        @ApiModelProperty(value = "유저 아이디")
+        private String userId;
+
+        @ApiModelProperty(value = "별명")
+        private String nickname;
+
+        @ApiModelProperty(value = "이메일")
+        private String email;
+
+        @ApiModelProperty(value = "비밀 번호")
+        private String password;
+
+        @ApiModelProperty(value = "이름")
+        private String name;
     }
 }

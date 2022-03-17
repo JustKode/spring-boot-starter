@@ -8,7 +8,8 @@ import java.util.Optional;
 
 @Service
 public interface UserService {
-    void register(UserRequestDto.Register user);
+    User register(UserRequestDto.Register user);
+    String login(UserRequestDto.Login login);
     boolean equalsPassword(String password, String encryptedPassword);
     User getUserWithAuthorities(String username);
     User getMyUserWithAuthorities();

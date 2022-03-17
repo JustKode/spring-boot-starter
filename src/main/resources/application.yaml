@@ -7,9 +7,10 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
+    database: h2
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
 jwt:
-  key: testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttest
+  key: testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest
   expiration-seconds: 604800
