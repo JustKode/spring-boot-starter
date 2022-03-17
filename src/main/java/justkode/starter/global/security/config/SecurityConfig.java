@@ -33,7 +33,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
-    @Order(1)
+    @Order(2)
     @RequiredArgsConstructor
     @Configuration
     public static class JWTRestSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -76,19 +76,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
                     .and()
                     .authorizeRequests()
-
-                    .anyRequest().permitAll()
-
+                    .antMatchers("/api/auth/**").permitAll()
+                    .antMatchers("/api/user/**").permitAll()
+                    .anyRequest().authenticated()
                     .and()
                     .apply(new JwtSecurityConfig(tokenProvider));
         }
     }
 
-    @Order(2)
+    @Order(1)
     @Configuration
     public static class SwaggerSecurityConfig extends WebSecurityConfigurerAdapter {
         private static final RequestMatcher SWAGGER_URLS = new OrRequestMatcher(
-                new AntPathRequestMatcher("/v2/api-docs")
+                new AntPathRequestMatcher("/swagger-ui/**")
         );
 
         @Override
@@ -100,7 +100,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         protected void configure(HttpSecurity http) throws Exception {
             http
                     .authorizeRequests()
-                    .requestMatchers(SWAGGER_URLS).hasRole("ADMIN")
+                    .requestMatchers(SWAGGER_URLS).authenticated()
                     .and()
                     .csrf().disable()
                     .httpBasic();
