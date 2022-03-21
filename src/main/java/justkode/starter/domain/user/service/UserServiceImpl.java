@@ -20,7 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     final private UserRepository userRepository;
     final private PasswordEncoder passwordEncoder;
     final private TokenProvider tokenProvider;

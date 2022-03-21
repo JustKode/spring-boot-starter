@@ -5,6 +5,9 @@ import io.swagger.annotations.ApiModelProperty;
 import justkode.starter.domain.user.User;
 import lombok.*;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+
 
 public class UserRequestDto {
 
@@ -14,10 +17,12 @@ public class UserRequestDto {
     @AllArgsConstructor
     public static class Login {
 
-        @ApiModelProperty(value = "유저 아이디")
+        @NotEmpty
+        @ApiModelProperty(value = "유저 아이디", required = true)
         private String userId;
 
-        @ApiModelProperty(value = "비밀 번호")
+        @NotEmpty
+        @ApiModelProperty(value = "비밀 번호", required = true)
         private String password;
     }
 
@@ -27,19 +32,24 @@ public class UserRequestDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Register {
-        @ApiModelProperty(value = "유저 아이디")
+        @NotEmpty
+        @ApiModelProperty(value = "유저 아이디", required = true)
         private String userId;
 
-        @ApiModelProperty(value = "별명")
+        @NotEmpty
+        @ApiModelProperty(value = "별명", required = true)
         private String nickname;
 
-        @ApiModelProperty(value = "이메일")
+        @NotEmpty @Email
+        @ApiModelProperty(value = "이메일", required = true)
         private String email;
 
-        @ApiModelProperty(value = "비밀 번호")
+        @NotEmpty
+        @ApiModelProperty(value = "비밀 번호", required = true)
         private String password;
 
-        @ApiModelProperty(value = "이름")
+        @NotEmpty
+        @ApiModelProperty(value = "이름", required = true)
         private String name;
     }
 }

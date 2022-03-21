@@ -11,24 +11,26 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @Api(tags = {"Auth Controller"})
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
-    final private UserService userService;
+    private final UserService userService;
 
     @ApiOperation(value = "회원가입 API 입니다.")
     @PostMapping("/register")
     @ResponseStatus(value = HttpStatus.CREATED)
-    public UserResponseDto.Profile register(@ApiParam(value="회원 정보", required = true) @RequestBody final UserRequestDto.Register userDto) {
+    public UserResponseDto.Profile register(@ApiParam(value="회원 정보", required = true) @Valid @RequestBody final UserRequestDto.Register userDto) {
         return UserResponseDto.Profile.of(userService.register(userDto));
     }
 
     @ApiOperation(value = "로그인 API 입니다.")
     @PostMapping("/login")
     @ResponseStatus(value = HttpStatus.CREATED)
-    public UserResponseDto.Token login(@ApiParam(value="회원 정보", required = true) @RequestBody final UserRequestDto.Login userDto) {
+    public UserResponseDto.Token login(@ApiParam(value="회원 정보", required = true) @Valid @RequestBody final UserRequestDto.Login userDto) {
         return new UserResponseDto.Token(userService.login(userDto));
     }
 }
