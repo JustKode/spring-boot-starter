@@ -33,7 +33,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
-    @Order(2)
+    @Order(1)
     @RequiredArgsConstructor
     @Configuration
     public static class JWTRestSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -54,37 +54,32 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         @Override
         protected void configure(HttpSecurity httpSecurity) throws Exception {
             httpSecurity
-                    // token을 사용하는 방식이기 때문에 csrf를 disable합니다.
-                    .csrf().disable()
-
-                    .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
-
+                    .sessionManagement()
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    .and()
                     .exceptionHandling()
                     .defaultAuthenticationEntryPointFor(jwtAuthenticationEntryPoint, PROTECTED_URLS)
                     .accessDeniedHandler(jwtAccessDeniedHandler)
-
-                    // enable h2-console
                     .and()
                     .headers()
                     .frameOptions()
                     .sameOrigin()
-
-                    // 세션을 사용하지 않기 때문에 STATELESS로 설정
                     .and()
-                    .sessionManagement()
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-
-                    .and()
+                    .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
                     .authorizeRequests()
                     .antMatchers("/api/auth/**").permitAll()
                     .antMatchers("/api/user/**").permitAll()
-                    .anyRequest().authenticated()
+                    .requestMatchers(PROTECTED_URLS).authenticated()
                     .and()
+                    .csrf().disable()
+                    .formLogin().disable()
+                    .httpBasic().disable()
+                    .logout().disable()
                     .apply(new JwtSecurityConfig(tokenProvider));
         }
     }
 
-    @Order(1)
+    @Order(2)
     @Configuration
     public static class SwaggerSecurityConfig extends WebSecurityConfigurerAdapter {
         private static final RequestMatcher SWAGGER_URLS = new OrRequestMatcher(
