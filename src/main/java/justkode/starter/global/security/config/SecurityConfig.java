@@ -18,6 +18,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -52,15 +53,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         }
 
         @Override
-        protected void configure(HttpSecurity httpSecurity) throws Exception {
-            httpSecurity
-                    .sessionManagement()
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                    .and()
-                    .exceptionHandling()
-                    .defaultAuthenticationEntryPointFor(jwtAuthenticationEntryPoint, PROTECTED_URLS)
-                    .accessDeniedHandler(jwtAccessDeniedHandler)
-                    .and()
+        protected void configure(HttpSecurity http) throws Exception {
+            http
+                    .requestMatcher(PROTECTED_URLS)
+                    // session 제거
+                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+
+                    //
+                    .exceptionHandling().defaultAuthenticationEntryPointFor(jwtAuthenticationEntryPoint, PROTECTED_URLS)
+                    .accessDeniedHandler(jwtAccessDeniedHandler).and()
                     .headers()
                     .frameOptions()
                     .sameOrigin()
@@ -73,17 +74,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .and()
                     .csrf().disable()
                     .formLogin().disable()
-                    .httpBasic().disable()
+                    .httpBasic().and()
                     .logout().disable()
                     .apply(new JwtSecurityConfig(tokenProvider));
         }
     }
 
+
     @Order(2)
     @Configuration
     public static class SwaggerSecurityConfig extends WebSecurityConfigurerAdapter {
         private static final RequestMatcher SWAGGER_URLS = new OrRequestMatcher(
-                new AntPathRequestMatcher("/swagger-ui/**")
+                new AntPathRequestMatcher("/v2/api-docs")
         );
 
         @Override
@@ -94,10 +96,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http
+                    .requestMatcher(SWAGGER_URLS)
                     .authorizeRequests()
                     .requestMatchers(SWAGGER_URLS).authenticated()
                     .and()
-                    .csrf().disable()
                     .httpBasic();
         }
     }
